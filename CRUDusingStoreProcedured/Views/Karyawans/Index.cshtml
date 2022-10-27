@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Karyawan Page";
+}
+
+<input type="text" id="txtSearch" style="margin-right:5px;" placeholder="Type Name" />
+<button id="btnGetKaryawans" class="btn btn-primary">Get Karyawans</button>
+
+<br />
+<br />
+
+<input type="hidden" id="txtKaryawanId" style="margin-right:5px;"  />
+<input type="text" id="txtName" style="margin-right:5px;" placeholder="Name" />
+<input type="text" id="txtTglLahir" style="margin-right:5px;" placeholder="Tanggal Lahir" />
+<input type="text" id="txtTglMasuk" style="margin-right:5px;" placeholder=" Masuk" />
+<input type="text" id="txtAlamat" style="margin-right:5px;" placeholder="Alamat" />
+<button id="btnSaveKaryawan" class="btn btn-success">Save Karyawan</button>
+
+<br />
+<br />
+
+<table id="tblKaryawan" class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>NikId</th>
+            <th>Name</th>
+            <th>Tgl Lahir</th>
+            <th>Tgl Masuk</th>
+            <th>Alamat</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script src="~/jquery/jquery.min.js"></script>
+<script type="text/javascript">
+    var _karyawans = [];
+    
+    $("#btnGetKaryawans").click(function () {
+        GetKaryawans();
+    });
+    $("btnSaveKaryawan").click(function () {
+        var karyawan = {
+            KaryawanId: $("#txtKaryawanId").val(),
+            Name: $("#txtName").val (),
+            TglLahir: $("#txtTglLahir").val (),
+            TglMasuk: $("#txtTglMasuk").val (),
+            Alamat: $("txtAlamat").val()
+        };
+        $.post("Karyawans/SaveOrUpdate", karyawan, function () {
+            $("#txtKaryawanId").val(0);
+            Getkaryawans();
+            Reset();
+        });
+     });
+
+     function GetKaryawans(){
+         _karyawans = [];
+         $("#tblKaryawan tbody tr").remove();
+
+         var name = $.trims($("#txtSearch").val());
+         $.get("Karyawans/GetKaryawans?name=" + name, function (karyawans){
+             _karyawans = karyawans;
+             $.map(karyawans, function (karyawan) {
+                 $("#tblKaryawan tbody").append(`<tr>
+                                                      <td>` + karyawan.NIKId + `</td>
+                                                      <td>` + karyawan.name + `</td>
+                                                      <td>` + karyawan.TglLahir + `</td>
+                                                      <td>` + karyawan.TglMasuk + `</td>
+                                                      <td>` + karyawan.Alamat + `</td>
+                                                      <td>
+                                                          <button class="btn btn-primary" onclick='Edit(`+ karyawan.NIKId +  `)'>Edit</button>
+                                                          <button class="btn btn-warning" onclick='Delete(`+ karyawan.NIKId + `)'>Edit</button>
+                                                      </td>
+                                                      </tr>`);
+         });
+     });
+    }
+    function Edit(karyawanId) {
+        var karyawan = _karyawan.find(x => x.karyawanId == karyawanId)
+        $("#txtKaryawanId").val(karyawan.karyawanId);
+        $("#txtName").val(karyawan.name);
+        $("#txtTglLahir").val(karyawan.TglLahir);
+        $("#txtMasuk").val(karyawan.TglMasuk);
+        $("#txtAlamat").val(karyawan.Alamat);
+    }
+    function Delete(karyawanId) {
+        $.post("Karyawans/Delete?karyawanId=" +karyawanId, function (){
+            GetKaryawans();
+        });
+    }
+    function Reset (){
+        $("#tctKaryawanId").val(0),
+        $("#txtName").val(),
+        $("#txtTglLahir").val(),
+        $("#txtTglMasuk").val(),
+        $("txtAlamat").val()
+    }
+
+
+</script>
